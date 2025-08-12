@@ -23,7 +23,7 @@ const UsernameForm: React.FC = () => {
     const checkRoom = async () => {
       if (roomId) {
         try {
-          const response = await fetch(`http://localhost:3001/api/rooms/${roomId}`);
+          const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/rooms/${roomId}`);
           if (response.ok) {
             setRoomExists(true);
           } else {

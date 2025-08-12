@@ -10,7 +10,7 @@ const Home: React.FC = () => {
   const createRoom = async () => {
     setIsCreating(true);
     try {
-      const response = await fetch('http://localhost:3001/api/rooms', {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/rooms`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

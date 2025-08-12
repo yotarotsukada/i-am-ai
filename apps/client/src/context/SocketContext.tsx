@@ -29,7 +29,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isUsernameSet, setIsUsernameSet] = useState(false);
 
   useEffect(() => {
-    const newSocket = io('http://localhost:3001');
+    const newSocket = io(import.meta.env.VITE_SERVER_URL);
     setSocket(newSocket);
 
     newSocket.on('connect', () => {

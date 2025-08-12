@@ -12,7 +12,8 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
-    "clean": "turbo clean"
+    "clean": "turbo clean",
+    "start": "turbo start"
   },
   "keywords": ["chat", "realtime", "websocket", "monorepo"],
   "author": "",

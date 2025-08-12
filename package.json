@@ -1,0 +1,24 @@
+{
+  "name": "i-am-ai",
+  "version": "1.0.0",
+  "description": "Real-time chat application",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check",
+    "clean": "turbo clean"
+  },
+  "keywords": ["chat", "realtime", "websocket", "monorepo"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "turbo": "^2.5.5"
+  },
+  "packageManager": "npm@10.2.4"
+}

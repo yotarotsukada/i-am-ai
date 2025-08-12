@@ -5,16 +5,28 @@ import cors from 'cors';
 import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
 
-dotenv.config();
+// Renderでは環境変数は自動で設定されるが、開発環境では.envファイルを読み込む
+if (process.env.NODE_ENV !== 'production') {
+  const result = dotenv.config();
+  console.log('dotenv result:', result);
+}
 
-// ログ出力：環境変数の確認
+// 環境変数の詳細ログ
+console.log('=== ENVIRONMENT DEBUGGING ===');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('All environment variables containing "CLIENT" or "PORT":');
+Object.keys(process.env)
+  .filter(key => key.includes('CLIENT') || key.includes('PORT'))
+  .forEach(key => console.log(`  ${key}:`, process.env[key]));
+
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
 const PORT = process.env.PORT || 3001;
-console.log('Environment variables:', {
-  CLIENT_URL,
-  PORT,
-  NODE_ENV: process.env.NODE_ENV
-});
+
+console.log('Final configuration:');
+console.log('  CLIENT_URL:', CLIENT_URL);
+console.log('  PORT:', PORT);
+console.log('  Is production:', process.env.NODE_ENV === 'production');
+console.log('==============================');
 import {
   Room,
   Message,
@@ -41,6 +53,38 @@ app.use(cors({
   credentials: false
 }));
 app.use(express.json());
+
+// ヘルスチェックエンドポイント（Render用）
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'I Am AI Server is running',
+    timestamp: new Date().toISOString(),
+    environment: {
+      NODE_ENV: process.env.NODE_ENV,
+      CLIENT_URL: CLIENT_URL,
+      PORT: PORT
+    },
+    rooms: rooms.size,
+    activeConnections: userSocketMap.size
+  });
+});
+
+// 環境変数デバッグエンドポイント
+app.get('/debug/env', (req, res) => {
+  const envVars = Object.keys(process.env)
+    .filter(key => key.includes('CLIENT') || key.includes('PORT') || key.includes('NODE_ENV'))
+    .reduce((obj, key) => {
+      obj[key] = process.env[key];
+      return obj;
+    }, {} as any);
+  
+  res.json({
+    message: 'Environment variables debug',
+    envVars,
+    processEnvKeys: Object.keys(process.env).length
+  });
+});
 
 const rooms = new Map<string, Room>();
 const userSocketMap = new Map<string, UserSession>();

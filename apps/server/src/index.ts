@@ -3,30 +3,6 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import { v4 as uuidv4 } from 'uuid';
-import dotenv from 'dotenv';
-
-// Renderでは環境変数は自動で設定されるが、開発環境では.envファイルを読み込む
-if (process.env.NODE_ENV !== 'production') {
-  const result = dotenv.config();
-  console.log('dotenv result:', result);
-}
-
-// 環境変数の詳細ログ
-console.log('=== ENVIRONMENT DEBUGGING ===');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('All environment variables containing "CLIENT" or "PORT":');
-Object.keys(process.env)
-  .filter(key => key.includes('CLIENT') || key.includes('PORT'))
-  .forEach(key => console.log(`  ${key}:`, process.env[key]));
-
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
-const PORT = process.env.PORT || 3001;
-
-console.log('Final configuration:');
-console.log('  CLIENT_URL:', CLIENT_URL);
-console.log('  PORT:', PORT);
-console.log('  Is production:', process.env.NODE_ENV === 'production');
-console.log('==============================');
 import {
   Room,
   Message,
@@ -42,49 +18,13 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // 一時的に全許可
-    methods: ["GET", "POST"],
-    credentials: false
+    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    methods: ["GET", "POST"]
   }
 });
 
-app.use(cors({
-  origin: "*", // 一時的に全許可
-  credentials: false
-}));
+app.use(cors());
 app.use(express.json());
-
-// ヘルスチェックエンドポイント（Render用）
-app.get('/', (req, res) => {
-  res.json({
-    status: 'ok',
-    message: 'I Am AI Server is running',
-    timestamp: new Date().toISOString(),
-    environment: {
-      NODE_ENV: process.env.NODE_ENV,
-      CLIENT_URL: CLIENT_URL,
-      PORT: PORT
-    },
-    rooms: rooms.size,
-    activeConnections: userSocketMap.size
-  });
-});
-
-// 環境変数デバッグエンドポイント
-app.get('/debug/env', (req, res) => {
-  const envVars = Object.keys(process.env)
-    .filter(key => key.includes('CLIENT') || key.includes('PORT') || key.includes('NODE_ENV'))
-    .reduce((obj, key) => {
-      obj[key] = process.env[key];
-      return obj;
-    }, {} as any);
-  
-  res.json({
-    message: 'Environment variables debug',
-    envVars,
-    processEnvKeys: Object.keys(process.env).length
-  });
-});
 
 const rooms = new Map<string, Room>();
 const userSocketMap = new Map<string, UserSession>();
@@ -333,8 +273,7 @@ io.on('connection', (socket) => {
   });
 });
 
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`CORS configured for CLIENT_URL: ${CLIENT_URL}`);
-  console.log('Temporary CORS setting: allowing all origins (*)');
 });

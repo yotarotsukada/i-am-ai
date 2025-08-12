@@ -6,6 +6,15 @@ import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+// ログ出力：環境変数の確認
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
+const PORT = process.env.PORT || 3001;
+console.log('Environment variables:', {
+  CLIENT_URL,
+  PORT,
+  NODE_ENV: process.env.NODE_ENV
+});
 import {
   Room,
   Message,
@@ -21,12 +30,16 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
-    methods: ["GET", "POST"]
+    origin: "*", // 一時的に全許可
+    methods: ["GET", "POST"],
+    credentials: false
   }
 });
 
-app.use(cors());
+app.use(cors({
+  origin: "*", // 一時的に全許可
+  credentials: false
+}));
 app.use(express.json());
 
 const rooms = new Map<string, Room>();
@@ -276,7 +289,8 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`CORS configured for CLIENT_URL: ${CLIENT_URL}`);
+  console.log('Temporary CORS setting: allowing all origins (*)');
 });
